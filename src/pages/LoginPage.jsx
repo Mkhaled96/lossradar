@@ -41,14 +41,13 @@ export default function LoginPage() {
   return (
     <div style={styles.page}>
       <div style={styles.leftPanel}>
-        <RouteSignature />
         <div style={styles.brandBlock}>
-          <div style={styles.brandMark}>LOSS</div>
-          <div style={styles.brandSub}>RADAR</div>
-          <p style={styles.tagline}>
-            تتبع كل مركبة. تعرف كل خسارة. تتحكم في كل قرار.
-          </p>
+          <div style={styles.brandMark}>LOSS<span style={styles.brandAccent}>RADAR</span></div>
         </div>
+        <RadarChartSignature />
+        <p style={styles.tagline}>
+          ترصد كل خسارة. تكشف كل نمط. تتحكم في كل قرار.
+        </p>
       </div>
 
       <div style={styles.rightPanel}>
@@ -87,43 +86,85 @@ export default function LoginPage() {
   );
 }
 
-// A GPS route-line that draws itself on load — the signature element
-function RouteSignature() {
+// A radar sweep scanning over a loss-analytics bar chart — the signature element
+function RadarChartSignature() {
+  // bar heights (last bar = the "loss" the radar reveals)
+  const bars = [40, 65, 50, 90, 55, 120];
+  const barWidth = 32;
+  const gap = 18;
+  const chartBaseY = 190;
+  const totalWidth = bars.length * (barWidth + gap) - gap;
+  const startX = (400 - totalWidth) / 2;
+
   return (
     <svg
-      viewBox="0 0 400 240"
+      viewBox="0 0 400 220"
       style={styles.routeSvg}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M20 210 C 80 210, 60 120, 130 110 S 220 40, 260 60 S 340 30, 380 20"
-        fill="none"
-        stroke="#D9762E"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeDasharray="600"
-        strokeDashoffset="600"
-      >
-        <animate
-          attributeName="stroke-dashoffset"
-          from="600"
-          to="0"
-          dur="2.2s"
-          fill="freeze"
-          calcMode="spline"
-          keySplines="0.25 0.1 0.25 1"
+      {/* baseline */}
+      <line x1="20" y1={chartBaseY} x2="380" y2={chartBaseY} stroke="#3A4354" strokeWidth="1" />
+
+      {/* bars rising in */}
+      {bars.map((h, i) => {
+        const x = startX + i * (barWidth + gap);
+        const isLossBar = i === bars.length - 1;
+        return (
+          <rect
+            key={i}
+            x={x}
+            width={barWidth}
+            y={chartBaseY}
+            height="0"
+            rx="3"
+            fill={isLossBar ? "#D9762E" : "#4B5768"}
+          >
+            <animate
+              attributeName="height"
+              from="0"
+              to={h}
+              begin={`${0.15 * i}s`}
+              dur="0.6s"
+              fill="freeze"
+              calcMode="spline"
+              keySplines="0.25 0.1 0.25 1"
+            />
+            <animate
+              attributeName="y"
+              from={chartBaseY}
+              to={chartBaseY - h}
+              begin={`${0.15 * i}s`}
+              dur="0.6s"
+              fill="freeze"
+              calcMode="spline"
+              keySplines="0.25 0.1 0.25 1"
+            />
+          </rect>
+        );
+      })}
+
+      {/* radar sweep circle over the loss bar, arriving after bars settle */}
+      <g opacity="0">
+        <animate attributeName="opacity" from="0" to="1" begin="1.1s" dur="0.4s" fill="freeze" />
+        <circle
+          cx={startX + (bars.length - 1) * (barWidth + gap) + barWidth / 2}
+          cy={chartBaseY - bars[bars.length - 1] - 26}
+          r="16"
+          fill="none"
+          stroke="#D9762E"
+          strokeWidth="1.5"
+          opacity="0.6"
+        >
+          <animate attributeName="r" values="10;22;10" dur="2.4s" begin="1.5s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.7;0;0.7" dur="2.4s" begin="1.5s" repeatCount="indefinite" />
+        </circle>
+        <circle
+          cx={startX + (bars.length - 1) * (barWidth + gap) + barWidth / 2}
+          cy={chartBaseY - bars[bars.length - 1] - 26}
+          r="4"
+          fill="#D9762E"
         />
-      </path>
-      <circle cx="20" cy="210" r="5" fill="#1F2937" />
-      <circle cx="380" cy="20" r="6" fill="#D9762E">
-        <animate
-          attributeName="r"
-          values="6;9;6"
-          dur="2s"
-          begin="2.2s"
-          repeatCount="indefinite"
-        />
-      </circle>
+      </g>
     </svg>
   );
 }
@@ -148,32 +189,30 @@ const styles = {
     overflow: "hidden",
   },
   routeSvg: {
-    width: "80%",
-    maxWidth: "380px",
-    marginBottom: "24px",
+    width: "85%",
+    maxWidth: "400px",
+    margin: "36px 0",
   },
   brandBlock: {
     textAlign: "center",
   },
   brandMark: {
-    fontSize: "42px",
+    fontSize: "36px",
     fontWeight: 800,
-    letterSpacing: "4px",
+    letterSpacing: "3px",
     color: "#F4F1EA",
   },
-  brandSub: {
-    fontSize: "18px",
-    fontWeight: 500,
-    letterSpacing: "8px",
+  brandAccent: {
     color: "#D9762E",
-    marginTop: "-6px",
   },
   tagline: {
-    marginTop: "24px",
-    fontSize: "15px",
-    color: "#B8BCC4",
-    maxWidth: "320px",
-    lineHeight: 1.7,
+    fontSize: "18px",
+    fontWeight: 700,
+    color: "#F4F1EA",
+    maxWidth: "340px",
+    lineHeight: 1.6,
+    textAlign: "center",
+    marginTop: "12px",
   },
   rightPanel: {
     flex: 1,
