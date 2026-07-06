@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
+import { useLanguage } from "../lib/i18n.jsx";
+import LanguageToggle from "../components/LanguageToggle.jsx";
 
 export default function AdminDashboard() {
+  const { t } = useLanguage();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -45,11 +48,7 @@ export default function AdminDashboard() {
     setSaving(false);
 
     if (insertError) {
-      setError(
-        insertError.message.includes("duplicate")
-          ? "كود العميل ده مستخدم قبل كده، اختار كود مختلف"
-          : "حصل خطأ، حاول تاني"
-      );
+      setError(insertError.message.includes("duplicate") ? t("duplicate_code_error") : t("generic_error"));
       return;
     }
 
@@ -60,13 +59,14 @@ export default function AdminDashboard() {
 
   return (
     <div style={styles.page}>
+      <LanguageToggle />
       <header style={styles.header}>
         <div>
-          <div style={styles.eyebrow}>لوحة تحكم الـ Owner</div>
-          <h1 style={styles.heading}>العملاء</h1>
+          <div style={styles.eyebrow}>{t("owner_eyebrow")}</div>
+          <h1 style={styles.heading}>{t("clients_heading")}</h1>
         </div>
         <button style={styles.primaryButton} onClick={() => setShowForm(!showForm)}>
-          {showForm ? "إلغاء" : "+ عميل جديد"}
+          {showForm ? t("cancel_button") : t("new_client_button")}
         </button>
       </header>
 
@@ -74,17 +74,16 @@ export default function AdminDashboard() {
         <form style={styles.card} onSubmit={handleCreateClient}>
           <div style={styles.formGrid}>
             <div>
-              <label style={styles.label}>اسم العميل</label>
+              <label style={styles.label}>{t("client_name_label")}</label>
               <input
                 style={styles.input}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="مثال: شركة الشرق للتوزيع"
                 required
               />
             </div>
             <div>
-              <label style={styles.label}>كود العميل</label>
+              <label style={styles.label}>{t("client_code_label")}</label>
               <input
                 style={styles.input}
                 value={form.client_code}
@@ -94,16 +93,15 @@ export default function AdminDashboard() {
               />
             </div>
             <div>
-              <label style={styles.label}>Google Sheet ID</label>
+              <label style={styles.label}>{t("sheet_id_label")}</label>
               <input
                 style={styles.input}
                 value={form.google_sheet_id}
                 onChange={(e) => setForm({ ...form, google_sheet_id: e.target.value })}
-                placeholder="من رابط الشيت بتاعه"
               />
             </div>
             <div>
-              <label style={styles.label}>اسم التاب (Tab)</label>
+              <label style={styles.label}>{t("sheet_tab_label")}</label>
               <input
                 style={styles.input}
                 value={form.sheet_tab_name}
@@ -116,24 +114,24 @@ export default function AdminDashboard() {
           {error && <div style={styles.errorBox}>{error}</div>}
 
           <button style={styles.primaryButton} type="submit" disabled={saving}>
-            {saving ? "جارٍ الحفظ..." : "حفظ العميل"}
+            {saving ? t("saving") : t("save_client_button")}
           </button>
         </form>
       )}
 
       <div style={styles.card}>
         {loading ? (
-          <p style={styles.muted}>جارٍ التحميل...</p>
+          <p style={styles.muted}>{t("loading")}</p>
         ) : clients.length === 0 ? (
-          <p style={styles.muted}>لسه معملتش أي عميل. دوس "+ عميل جديد" فوق عشان تبدأ.</p>
+          <p style={styles.muted}>{t("no_clients_yet")}</p>
         ) : (
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>الاسم</th>
-                <th style={styles.th}>الكود</th>
-                <th style={styles.th}>Google Sheet</th>
-                <th style={styles.th}>تاريخ الإضافة</th>
+                <th style={styles.th}>{t("table_name")}</th>
+                <th style={styles.th}>{t("table_code")}</th>
+                <th style={styles.th}>{t("table_sheet")}</th>
+                <th style={styles.th}>{t("table_date")}</th>
               </tr>
             </thead>
             <tbody>
@@ -147,14 +145,12 @@ export default function AdminDashboard() {
                   <td style={styles.tdCode}>{c.client_code}</td>
                   <td style={styles.td}>
                     {c.google_sheet_id ? (
-                      <span style={styles.badgeGreen}>مربوط</span>
+                      <span style={styles.badgeGreen}>{t("sheet_linked")}</span>
                     ) : (
-                      <span style={styles.badgeGray}>مش مربوط</span>
+                      <span style={styles.badgeGray}>{t("sheet_not_linked")}</span>
                     )}
                   </td>
-                  <td style={styles.td}>
-                    {new Date(c.created_at).toLocaleDateString("ar-EG")}
-                  </td>
+                  <td style={styles.td}>{new Date(c.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -171,7 +167,7 @@ const styles = {
     background: "#F4F1EA",
     padding: "40px",
     fontFamily: "'Inter', 'Segoe UI', sans-serif",
-    direction: "rtl",
+    position: "relative",
   },
   header: {
     display: "flex",
@@ -248,7 +244,7 @@ const styles = {
     borderCollapse: "collapse",
   },
   th: {
-    textAlign: "right",
+    textAlign: "start",
     fontSize: "13px",
     color: "#6B7280",
     fontWeight: 600,
