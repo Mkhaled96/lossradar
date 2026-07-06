@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
+import { useLanguage } from "../lib/i18n.jsx";
+import LanguageToggle from "../components/LanguageToggle.jsx";
 
 export default function ClientDetail() {
+  const { t } = useLanguage();
   const { clientId } = useParams();
   const [client, setClient] = useState(null);
   const [projects, setProjects] = useState([]);
@@ -46,7 +49,7 @@ export default function ClientDetail() {
     setSaving(false);
 
     if (insertError) {
-      setError("حصل خطأ، حاول تاني");
+      setError(t("generic_error"));
       return;
     }
 
@@ -55,18 +58,25 @@ export default function ClientDetail() {
     loadData();
   }
 
-  async function updateProgress(projectId, newProgress) {
-    await supabase.from("projects").update({ progress: newProgress }).eq("id", projectId);
-    loadData();
+  // Optimistic update: reflect the slider value instantly in the UI,
+  // then persist to the database in the background.
+  function updateProgress(projectId, newProgress) {
+    setProjects((prev) =>
+      prev.map((p) => (p.id === projectId ? { ...p, progress: newProgress } : p))
+    );
+    supabase.from("projects").update({ progress: newProgress }).eq("id", projectId);
   }
 
   if (loading) {
-    return <div style={styles.page}>جارٍ التحميل...</div>;
+    return <div style={styles.page}>{t("loading")}</div>;
   }
 
   return (
     <div style={styles.page}>
-      <Link to="/admin" style={styles.backLink}>← رجوع للعملاء</Link>
+      <LanguageToggle />
+      <Link to="/admin" style={styles.backLink}>
+        {t("back_to_clients")}
+      </Link>
 
       <header style={styles.header}>
         <div>
@@ -74,7 +84,7 @@ export default function ClientDetail() {
           <h1 style={styles.heading}>{client?.name}</h1>
         </div>
         <button style={styles.primaryButton} onClick={() => setShowForm(!showForm)}>
-          {showForm ? "إلغاء" : "+ مشروع جديد"}
+          {showForm ? t("cancel_button") : t("new_project_button")}
         </button>
       </header>
 
@@ -82,17 +92,16 @@ export default function ClientDetail() {
         <form style={styles.card} onSubmit={handleCreateProject}>
           <div style={styles.formGrid}>
             <div>
-              <label style={styles.label}>اسم المشروع</label>
+              <label style={styles.label}>{t("project_name_label")}</label>
               <input
                 style={styles.input}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="مثال: تحليل خسائر الربع الأول"
                 required
               />
             </div>
             <div>
-              <label style={styles.label}>نسبة الإنجاز المبدئية (%)</label>
+              <label style={styles.label}>{t("project_progress_label")}</label>
               <input
                 style={styles.input}
                 type="number"
@@ -105,14 +114,14 @@ export default function ClientDetail() {
           </div>
           {error && <div style={styles.errorBox}>{error}</div>}
           <button style={styles.primaryButton} type="submit" disabled={saving}>
-            {saving ? "جارٍ الحفظ..." : "حفظ المشروع"}
+            {saving ? t("saving") : t("save_project_button")}
           </button>
         </form>
       )}
 
       <div style={styles.card}>
         {projects.length === 0 ? (
-          <p style={styles.muted}>لسه معملتش أي مشروع للعميل ده.</p>
+          <p style={styles.muted}>{t("no_projects_yet")}</p>
         ) : (
           projects.map((p) => (
             <div key={p.id} style={styles.projectRow}>
@@ -145,7 +154,7 @@ const styles = {
     background: "#F4F1EA",
     padding: "40px",
     fontFamily: "'Inter', 'Segoe UI', sans-serif",
-    direction: "rtl",
+    position: "relative",
   },
   backLink: {
     color: "#D9762E",
