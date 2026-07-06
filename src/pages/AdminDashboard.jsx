@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 
 export default function AdminDashboard() {
@@ -138,7 +139,11 @@ export default function AdminDashboard() {
             <tbody>
               {clients.map((c) => (
                 <tr key={c.id}>
-                  <td style={styles.td}>{c.name}</td>
+                  <td style={styles.td}>
+                    <Link to={`/admin/clients/${c.id}`} style={styles.rowLink}>
+                      {c.name}
+                    </Link>
+                  </td>
                   <td style={styles.tdCode}>{c.client_code}</td>
                   <td style={styles.td}>
                     {c.google_sheet_id ? (
@@ -276,5 +281,10 @@ const styles = {
     fontSize: "12px",
     padding: "3px 10px",
     borderRadius: "999px",
+  },
+  rowLink: {
+    color: "#1F2937",
+    textDecoration: "none",
+    fontWeight: 600,
   },
 };
