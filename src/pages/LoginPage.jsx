@@ -43,8 +43,8 @@ export default function LoginPage() {
       <div style={styles.leftPanel}>
         <RouteSignature />
         <div style={styles.brandBlock}>
-          <div style={styles.brandMark}>NEXUR</div>
-          <div style={styles.brandSub}>FLEET</div>
+          <div style={styles.brandMark}>LOSS</div>
+          <div style={styles.brandSub}>RADAR</div>
           <p style={styles.tagline}>
             تتبع كل مركبة. تعرف كل خسارة. تتحكم في كل قرار.
           </p>
