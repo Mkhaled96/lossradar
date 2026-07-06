@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { useLanguage } from "../lib/i18n.jsx";
+import LanguageToggle from "../components/LanguageToggle.jsx";
 
 export default function LoginPage() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,11 +23,10 @@ export default function LoginPage() {
     setLoading(false);
 
     if (authError) {
-      setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+      setError(t("login_error"));
       return;
     }
 
-    // Fetch role to redirect appropriately
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -40,22 +42,23 @@ export default function LoginPage() {
 
   return (
     <div style={styles.page}>
+      <LanguageToggle />
       <div style={styles.leftPanel}>
         <div style={styles.brandBlock}>
-          <div style={styles.brandMark}>LOSS<span style={styles.brandAccent}>RADAR</span></div>
+          <div style={styles.brandMark}>
+            LOSS<span style={styles.brandAccent}>RADAR</span>
+          </div>
         </div>
         <RadarChartSignature />
-        <p style={styles.tagline}>
-          ترصد كل خسارة. تكشف كل نمط. تتحكم في كل قرار.
-        </p>
+        <p style={styles.tagline}>{t("login_tagline")}</p>
       </div>
 
       <div style={styles.rightPanel}>
         <form style={styles.form} onSubmit={handleLogin}>
-          <div style={styles.eyebrow}>تسجيل الدخول</div>
-          <h1 style={styles.heading}>ابدأ المراقبة</h1>
+          <div style={styles.eyebrow}>{t("login_eyebrow")}</div>
+          <h1 style={styles.heading}>{t("login_heading")}</h1>
 
-          <label style={styles.label}>البريد الإلكتروني</label>
+          <label style={styles.label}>{t("login_email")}</label>
           <input
             style={styles.input}
             type="email"
@@ -65,7 +68,7 @@ export default function LoginPage() {
             required
           />
 
-          <label style={styles.label}>كلمة المرور</label>
+          <label style={styles.label}>{t("login_password")}</label>
           <input
             style={styles.input}
             type="password"
@@ -78,7 +81,7 @@ export default function LoginPage() {
           {error && <div style={styles.errorBox}>{error}</div>}
 
           <button style={styles.button} type="submit" disabled={loading}>
-            {loading ? "جارٍ التحقق..." : "دخول"}
+            {loading ? t("login_loading") : t("login_button")}
           </button>
         </form>
       </div>
@@ -86,9 +89,7 @@ export default function LoginPage() {
   );
 }
 
-// A radar sweep scanning over a loss-analytics bar chart — the signature element
 function RadarChartSignature() {
-  // bar heights (last bar = the "loss" the radar reveals)
   const bars = [40, 65, 50, 90, 55, 120];
   const barWidth = 32;
   const gap = 18;
@@ -97,15 +98,8 @@ function RadarChartSignature() {
   const startX = (400 - totalWidth) / 2;
 
   return (
-    <svg
-      viewBox="0 0 400 220"
-      style={styles.routeSvg}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* baseline */}
+    <svg viewBox="0 0 400 220" style={styles.routeSvg} xmlns="http://www.w3.org/2000/svg">
       <line x1="20" y1={chartBaseY} x2="380" y2={chartBaseY} stroke="#3A4354" strokeWidth="1" />
-
-      {/* bars rising in */}
       {bars.map((h, i) => {
         const x = startX + i * (barWidth + gap);
         const isLossBar = i === bars.length - 1;
@@ -142,8 +136,6 @@ function RadarChartSignature() {
           </rect>
         );
       })}
-
-      {/* radar sweep circle over the loss bar, arriving after bars settle */}
       <g opacity="0">
         <animate attributeName="opacity" from="0" to="1" begin="1.1s" dur="0.4s" fill="freeze" />
         <circle
@@ -174,7 +166,7 @@ const styles = {
     display: "flex",
     minHeight: "100vh",
     fontFamily: "'Inter', 'Segoe UI', sans-serif",
-    direction: "rtl",
+    position: "relative",
   },
   leftPanel: {
     flex: 1,
