@@ -19,11 +19,6 @@ export default function AdminDashboard() {
     sheet_tab_name: "Sheet1",
   });
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    window.location.href = "/login";
-  }
-
   async function loadClients() {
     setLoading(true);
     const { data, error } = await supabase
@@ -74,10 +69,6 @@ export default function AdminDashboard() {
           {showForm ? t("cancel_button") : t("new_client_button")}
         </button>
       </header>
-
-      <button style={styles.logoutButton} onClick={handleLogout}>
-        {t("logout_button")}
-      </button>
 
       {showForm && (
         <form style={styles.card} onSubmit={handleCreateClient}>
@@ -291,18 +282,5 @@ const styles = {
     color: "#1F2937",
     textDecoration: "none",
     fontWeight: 600,
-  },
-  logoutButton: {
-    position: "absolute",
-    top: "20px",
-    insetInlineStart: "40px",
-    padding: "6px 14px",
-    borderRadius: "999px",
-    border: "1px solid #D8D3C7",
-    background: "transparent",
-    color: "#6B7280",
-    fontSize: "13px",
-    fontWeight: 600,
-    cursor: "pointer",
   },
 };
