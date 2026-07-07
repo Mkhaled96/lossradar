@@ -9,7 +9,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const cardRef = useRef(null);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -41,22 +40,9 @@ export default function LoginPage() {
     }
   }
 
-  function handleCardMouseMove(e) {
-    const card = cardRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    card.style.setProperty("--mx", `${x}%`);
-    card.style.setProperty("--my", `${y}%`);
-  }
-
   return (
     <div className="lr-page">
       <style>{css}</style>
-      <div className="lr-glow-blob lr-glow-1" />
-      <div className="lr-glow-blob lr-glow-2" />
-      <div className="lr-glow-blob lr-glow-3" />
       <ParticleField />
 
       <button className="lr-lang-toggle" onClick={toggleLang} type="button">
@@ -86,7 +72,7 @@ export default function LoginPage() {
           <p className="lr-hero-sub">{t("hero_sub")}</p>
 
           <div className="lr-mockup-grid">
-            <div className="lr-mock-card lr-mock-stat">
+            <GlowPanel className="lr-mock-card lr-mock-stat">
               <div className="lr-mock-label">{t("stat_total_loss")}</div>
               <div className="lr-mock-value">
                 5,749 <span className="lr-mock-unit">EGP</span>
@@ -97,9 +83,9 @@ export default function LoginPage() {
               <div className="lr-mock-foot">
                 38 {t("stat_trips")} · 468 {t("stat_violations")}
               </div>
-            </div>
+            </GlowPanel>
 
-            <div className="lr-mock-card lr-mock-alert">
+            <GlowPanel className="lr-mock-card lr-mock-alert">
               <div className="lr-mock-alert-title">⚠ {t("insight_alert")}</div>
               <div className="lr-mock-alert-body">
                 {t("insight_text")} <b className="lr-accent">44.9%</b>
@@ -107,14 +93,14 @@ export default function LoginPage() {
                 <span className="lr-muted">{t("insight_of_total")}</span>
               </div>
               <div className="lr-mock-link">{t("insight_view")} →</div>
-            </div>
+            </GlowPanel>
 
-            <div className="lr-mock-card lr-mock-chart">
+            <GlowPanel className="lr-mock-card lr-mock-chart">
               <div className="lr-mock-card-title">{t("chart_daily_title")}</div>
               <MiniLineChart />
-            </div>
+            </GlowPanel>
 
-            <div className="lr-mock-card lr-mock-donut">
+            <GlowPanel className="lr-mock-card lr-mock-donut">
               <div className="lr-mock-card-title">{t("donut_title")}</div>
               <div className="lr-donut-row">
                 <MiniDonut />
@@ -125,14 +111,13 @@ export default function LoginPage() {
                   <LegendRow color="#57534E" label={t("cat_idling")} value="27.1%" />
                 </div>
               </div>
-            </div>
+            </GlowPanel>
           </div>
         </div>
 
         {/* ===== Login card ===== */}
         <div className="lr-form-wrap">
-          <div className="lr-card" ref={cardRef} onMouseMove={handleCardMouseMove}>
-            <div className="lr-card-glow" />
+          <GlowPanel className="lr-card">
             <div className="lr-card-content">
               <div className="lr-card-brand">
                 <RadarLogo size={56} />
@@ -196,24 +181,33 @@ export default function LoginPage() {
                   {loading ? t("login_loading") : t("login_button")}
                   {!loading && <span className="lr-arrow">→</span>}
                 </button>
-
-                <div className="lr-divider">
-                  <span>{t("login_or")}</span>
-                </div>
-
-                <button type="button" className="lr-sso">
-                  🛡 {t("login_sso")}
-                </button>
               </form>
-
-              <div className="lr-footer-note">
-                🛡 {t("login_security")} · <span className="lr-accent">{t("login_cert")}</span>
-              </div>
-              <div className="lr-footer-copy">{t("login_footer")}</div>
             </div>
-          </div>
+          </GlowPanel>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Reusable wrapper: gives any card a cursor-tracked glass "light" glow on hover
+function GlowPanel({ className, children }) {
+  const ref = useRef(null);
+
+  function handleMove(e) {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    el.style.setProperty("--mx", `${x}%`);
+    el.style.setProperty("--my", `${y}%`);
+  }
+
+  return (
+    <div ref={ref} className={`lr-glowable ${className || ""}`} onMouseMove={handleMove}>
+      <div className="lr-glow-overlay" />
+      {children}
     </div>
   );
 }
@@ -308,9 +302,10 @@ function MiniDonut() {
   );
 }
 
-// Animated drifting particle network — the "moving sky"
+// Animated drifting particle network — the "moving sky" — with mouse interaction
 function ParticleField() {
   const canvasRef = useRef(null);
+  const mouseRef = useRef({ x: -9999, y: -9999 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -322,7 +317,7 @@ function ParticleField() {
     function resize() {
       w = canvas.width = canvas.offsetWidth;
       h = canvas.height = canvas.offsetHeight;
-      const count = Math.min(70, Math.floor((w * h) / 18000));
+      const count = Math.min(90, Math.floor((w * h) / 14000));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -331,14 +326,26 @@ function ParticleField() {
       }));
     }
 
+    function handleMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+    function handleMouseLeave() {
+      mouseRef.current = { x: -9999, y: -9999 };
+    }
+
     function tick() {
       ctx.clearRect(0, 0, w, h);
+      const mouse = mouseRef.current;
+
       for (const p of particles) {
         p.x += p.vx;
         p.y += p.vy;
         if (p.x < 0 || p.x > w) p.vx *= -1;
         if (p.y < 0 || p.y > h) p.vy *= -1;
       }
+
+      // connections between nearby particles
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const a = particles[i];
@@ -346,8 +353,8 @@ function ParticleField() {
           const dx = a.x - b.x;
           const dy = a.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 140) {
-            ctx.strokeStyle = `rgba(245,100,42,${0.12 * (1 - dist / 140)})`;
+          if (dist < 165) {
+            ctx.strokeStyle = `rgba(245,100,42,${0.16 * (1 - dist / 165)})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -356,21 +363,49 @@ function ParticleField() {
           }
         }
       }
+
+      // connections from cursor to nearby particles — the "selection" feel
       for (const p of particles) {
-        ctx.fillStyle = "rgba(245,100,42,0.55)";
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 160) {
+          ctx.strokeStyle = `rgba(245,100,42,${0.35 * (1 - dist / 160)})`;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+        }
+      }
+
+      // particles — brighter and bigger the closer they are to the cursor
+      for (const p of particles) {
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const proximity = Math.max(0, 1 - dist / 160);
+        const radius = 1.4 + proximity * 2.2;
+        const alpha = 0.55 + proximity * 0.45;
+        ctx.fillStyle = `rgba(245,100,42,${alpha})`;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.4, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
         ctx.fill();
       }
+
       animationId = requestAnimationFrame(tick);
     }
 
     resize();
     tick();
     window.addEventListener("resize", resize);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseleave", handleMouseLeave);
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
 
@@ -392,16 +427,6 @@ const css = `
     overflow: hidden;
     font-family: 'Inter', 'Segoe UI', sans-serif;
   }
-  .lr-glow-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(90px);
-    pointer-events: none;
-    z-index: 1;
-  }
-  .lr-glow-1 { top: -120px; left: -80px; width: 460px; height: 460px; background: rgba(245,100,42,0.22); }
-  .lr-glow-2 { top: 30%; right: 5%; width: 380px; height: 380px; background: rgba(180,83,9,0.16); }
-  .lr-glow-3 { bottom: -140px; left: 30%; width: 500px; height: 500px; background: rgba(245,100,42,0.10); }
   .lr-particles {
     position: absolute;
     inset: 0;
@@ -430,17 +455,18 @@ const css = `
     display: grid;
     grid-template-columns: 1.15fr 0.85fr;
     min-height: 100vh;
-    align-items: center;
+    align-items: stretch;
     gap: 40px;
-    padding: 56px 48px;
+    padding: 40px 48px;
   }
   .lr-showcase {
     color: #F4F1EA;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 8px;
   }
-  .lr-brand-row { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+  .lr-brand-row { display: flex; align-items: center; gap: 14px; margin-bottom: 30px; }
   .lr-brand-name { font-size: 22px; font-weight: 800; color: #F4F1EA; letter-spacing: -0.5px; }
   .lr-brand-name-center { font-size: 26px; margin-top: 10px; }
   .lr-brand-sub { font-size: 12px; color: #9CA3AF; letter-spacing: 1px; }
@@ -454,6 +480,25 @@ const css = `
     grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
+
+  /* ===== Generic cursor-tracked glow system (used by mock cards AND the login card) ===== */
+  .lr-glowable {
+    position: relative;
+    overflow: hidden;
+    --mx: 50%;
+    --my: 30%;
+  }
+  .lr-glow-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--mx) var(--my), rgba(245,100,42,0.20), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 1;
+  }
+  .lr-glowable:hover .lr-glow-overlay { opacity: 1; }
+
   .lr-mock-card {
     background: rgba(255,255,255,0.045);
     border: 1px solid rgba(255,255,255,0.09);
@@ -488,41 +533,25 @@ const css = `
   /* ===== Login card ===== */
   .lr-form-wrap { display: flex; justify-content: center; align-items: center; }
   .lr-card {
-    position: relative;
     width: 100%;
     max-width: 380px;
-    min-height: 620px;
     border-radius: 24px;
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(20,22,28,0.65);
     backdrop-filter: blur(20px);
     box-shadow: 0 30px 80px rgba(0,0,0,0.55);
-    overflow: hidden;
-    --mx: 50%;
-    --my: 30%;
   }
-  .lr-card-glow {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(circle at var(--mx) var(--my), rgba(245,100,42,0.22), transparent 55%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .lr-card:hover .lr-card-glow { opacity: 1; }
   .lr-card-content {
     position: relative;
+    z-index: 2;
     padding: 40px 32px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
   }
 
   .lr-card-brand { text-align: center; margin-bottom: 28px; }
   .lr-welcome { text-align: center; font-size: 24px; font-weight: 800; color: #F4F1EA; margin: 0 0 8px; }
   .lr-welcome-sub { text-align: center; font-size: 13px; color: #9CA3AF; margin-bottom: 30px; }
 
-  .lr-form { display: flex; flex-direction: column; flex: 1; }
+  .lr-form { display: flex; flex-direction: column; }
   .lr-label { font-size: 12px; color: #9CA3AF; margin-bottom: 7px; font-weight: 600; }
   .lr-input-wrap { position: relative; margin-bottom: 20px; }
   .lr-input-icon {
@@ -546,7 +575,7 @@ const css = `
     background: none; border: none; cursor: pointer; font-size: 14px;
   }
 
-  .lr-row-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+  .lr-row-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
   .lr-remember { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9CA3AF; }
   .lr-forgot { font-size: 12px; color: #F5642A; text-decoration: none; }
 
@@ -561,6 +590,7 @@ const css = `
   }
 
   .lr-submit {
+    width: 100%;
     display: flex; align-items: center; justify-content: center; gap: 8px;
     padding: 14px;
     border-radius: 10px;
@@ -571,42 +601,9 @@ const css = `
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 10px 25px rgba(245,100,42,0.3);
-    margin-top: auto;
   }
   .lr-arrow { transition: transform 0.2s ease; }
   .lr-submit:hover .lr-arrow { transform: translateX(3px); }
-
-  .lr-divider {
-    text-align: center;
-    font-size: 11px;
-    color: #6B7280;
-    margin: 22px 0;
-    position: relative;
-  }
-  .lr-divider::before, .lr-divider::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    width: 40%;
-    height: 1px;
-    background: rgba(255,255,255,0.1);
-  }
-  .lr-divider::before { left: 0; }
-  .lr-divider::after { right: 0; }
-
-  .lr-sso {
-    padding: 13px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.03);
-    color: #E5E7EB;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .lr-footer-note { text-align: center; font-size: 11px; color: #6B7280; margin-top: 26px; }
-  .lr-footer-copy { text-align: center; font-size: 10px; color: #4B5563; margin-top: 8px; }
 
   /* ===== Responsive ===== */
   @media (max-width: 1024px) {
@@ -619,7 +616,6 @@ const css = `
     .lr-form-wrap { padding: 40px 0; }
   }
   @media (max-width: 480px) {
-    .lr-card { min-height: auto; }
     .lr-card-content { padding: 28px 20px; }
     .lr-welcome { font-size: 20px; }
   }
