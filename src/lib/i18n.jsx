@@ -8,44 +8,8 @@ const translations = {
     login_email: "البريد الإلكتروني",
     login_password: "كلمة المرور",
     login_button: "دخول",
-    login_loading: "جارٍ التحقق...",
     login_error: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
     login_tagline: "ترصد كل خسارة. تكشف كل نمط. تتحكم في كل قرار.",
-    login_subtitle: "ذكاء تحليل الخسائر",
-    login_welcome: "أهلاً بيك تاني",
-    login_welcome_sub: "سجّل دخولك عشان توصل للوحة LossRadar بتاعتك",
-    login_remember: "فاكرني",
-    login_forgot: "نسيت كلمة المرور؟",
-    login_or: "أو",
-    login_sso: "دخول عبر SSO",
-    login_security: "أمان بمستوى المؤسسات",
-    login_cert: "معتمد ISO 27001",
-    login_footer: "© 2026 LossRadar. جميع الحقوق محفوظة.",
-
-    hero_headline_1: "حوّل بيانات الأسطول",
-    hero_headline_2: "لتحليل خسائر",
-    hero_headline_3: "قابل للتنفيذ.",
-    hero_sub: "رؤى لحظية. قرارات أذكى. خسائر أقل. أداء أعلى.",
-    stat_total_loss: "إجمالي الخسارة",
-    stat_vs_last: "مقارنة بآخر 30 يوم",
-    stat_trips: "رحلة متأخرة",
-    stat_violations: "مخالفة",
-    insight_alert: "تنبيه تحليلي",
-    insight_text: "انحراف المسار بيكلفك",
-    insight_of_total: "من إجمالي الخسارة",
-    insight_view: "عرض التفاصيل",
-    chart_daily_title: "الخسارة اليومية واستهلاك الوقود",
-    chart_last_7: "آخر 7 أيام",
-    chart_loss: "الخسارة (جنيه)",
-    chart_fuel: "استهلاك الوقود (لتر)",
-    donut_title: "الخسارة حسب النوع",
-    donut_total: "الإجمالي",
-    cat_deviation: "انحراف المسار",
-    cat_speeding: "السرعة الزايدة",
-    cat_braking: "الفرملة المفاجئة",
-    cat_idling: "التوقف الزايد",
-    driver_title: "أداء السائقين",
-    driver_view_all: "عرض الكل",
 
     owner_eyebrow: "لوحة تحكم الـ Owner",
     clients_heading: "الأطراف",
@@ -97,41 +61,6 @@ const translations = {
     login_loading: "Checking...",
     login_error: "Incorrect email or password",
     login_tagline: "Track every loss. Detect every pattern. Control every decision.",
-    login_subtitle: "Loss Intelligence",
-    login_welcome: "Welcome Back",
-    login_welcome_sub: "Sign in to access your LossRadar dashboard",
-    login_remember: "Remember me",
-    login_forgot: "Forgot password?",
-    login_or: "or",
-    login_sso: "Sign in with SSO",
-    login_security: "Enterprise-grade security",
-    login_cert: "ISO 27001 Certified",
-    login_footer: "© 2026 LossRadar. All rights reserved.",
-
-    hero_headline_1: "Turn Fleet Data",
-    hero_headline_2: "Into Actionable",
-    hero_headline_3: "Loss Intelligence.",
-    hero_sub: "Real-time insights. Smarter decisions. Lower losses. Higher performance.",
-    stat_total_loss: "TOTAL LOSS",
-    stat_vs_last: "vs last 30 days",
-    stat_trips: "delayed trips",
-    stat_violations: "violations",
-    insight_alert: "INSIGHT ALERT",
-    insight_text: "Route Deviation is costing",
-    insight_of_total: "of your total loss",
-    insight_view: "View details",
-    chart_daily_title: "Daily Loss & Fuel Waste",
-    chart_last_7: "Last 7 Days",
-    chart_loss: "Loss (EGP)",
-    chart_fuel: "Fuel Waste (L)",
-    donut_title: "Loss by Category",
-    donut_total: "Total",
-    cat_deviation: "Route Deviation",
-    cat_speeding: "Speeding",
-    cat_braking: "Harsh Braking",
-    cat_idling: "Excessive Idling",
-    driver_title: "Driver Performance",
-    driver_view_all: "View all",
 
     owner_eyebrow: "Owner Dashboard",
     clients_heading: "Parties",
@@ -178,7 +107,7 @@ const translations = {
 const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
-  const [lang, setLang] = useState(localStorage.getItem("lr_lang") || "en");
+  const [lang, setLang] = useState(localStorage.getItem("lr_lang") || "ar");
 
   function toggleLang() {
     const next = lang === "ar" ? "en" : "ar";
@@ -187,9 +116,7 @@ export function LanguageProvider({ children }) {
   }
 
   const t = (key) => translations[lang][key] || key;
-  // Layout direction is always fixed (ltr) regardless of language —
-  // only the text content changes, not the structure of the UI.
-  const dir = "ltr";
+  const dir = translations[lang].dir;
 
   return (
     <LanguageContext.Provider value={{ lang, toggleLang, t, dir }}>
