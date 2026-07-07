@@ -9,24 +9,38 @@ export default function ClientDetail() {
   const { clientId } = useParams();
   const [client, setClient] = useState(null);
   const [projects, setProjects] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [form, setForm] = useState({ name: "", progress: 0 });
+
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [savingProject, setSavingProject] = useState(false);
+  const [projectError, setProjectError] = useState("");
+  const [projectForm, setProjectForm] = useState({ name: "", progress: 0 });
+
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [savingUser, setSavingUser] = useState(false);
+  const [userError, setUserError] = useState("");
+  const [userSuccess, setUserSuccess] = useState("");
+  const [userForm, setUserForm] = useState({ email: "", password: "", full_name: "" });
 
   async function loadData() {
     setLoading(true);
-    const [{ data: clientData }, { data: projectsData }] = await Promise.all([
+    const [{ data: clientData }, { data: projectsData }, { data: usersData }] = await Promise.all([
       supabase.from("clients").select("*").eq("id", clientId).single(),
       supabase
         .from("projects")
         .select("*")
         .eq("client_id", clientId)
         .order("created_at", { ascending: false }),
+      supabase
+        .from("profiles")
+        .select("*")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: false }),
     ]);
     setClient(clientData);
     setProjects(projectsData || []);
+    setUsers(usersData || []);
     setLoading(false);
   }
 
@@ -37,34 +51,60 @@ export default function ClientDetail() {
 
   async function handleCreateProject(e) {
     e.preventDefault();
-    setError("");
-    setSaving(true);
+    setProjectError("");
+    setSavingProject(true);
 
     const { error: insertError } = await supabase.from("projects").insert({
       client_id: clientId,
-      name: form.name,
-      progress: Number(form.progress),
+      name: projectForm.name,
+      progress: Number(projectForm.progress),
     });
 
-    setSaving(false);
+    setSavingProject(false);
 
     if (insertError) {
-      setError(t("generic_error"));
+      setProjectError(t("generic_error"));
       return;
     }
 
-    setForm({ name: "", progress: 0 });
-    setShowForm(false);
+    setProjectForm({ name: "", progress: 0 });
+    setShowProjectForm(false);
     loadData();
   }
 
-  // Optimistic update: reflect the slider value instantly in the UI,
-  // then persist to the database in the background.
   function updateProgress(projectId, newProgress) {
     setProjects((prev) =>
       prev.map((p) => (p.id === projectId ? { ...p, progress: newProgress } : p))
     );
     supabase.from("projects").update({ progress: newProgress }).eq("id", projectId);
+  }
+
+  async function handleCreateUser(e) {
+    e.preventDefault();
+    setUserError("");
+    setUserSuccess("");
+    setSavingUser(true);
+
+    const { data, error: fnError } = await supabase.functions.invoke("create-party-user", {
+      body: {
+        email: userForm.email,
+        password: userForm.password,
+        full_name: userForm.full_name,
+        client_id: clientId,
+      },
+    });
+
+    setSavingUser(false);
+
+    if (fnError || !data?.success) {
+      setUserError(data?.error || t("generic_error"));
+      return;
+    }
+
+    setUserSuccess(t("user_created_success"));
+    setUserForm({ email: "", password: "", full_name: "" });
+    setShowUserForm(false);
+    loadData();
   }
 
   if (loading) {
@@ -83,20 +123,25 @@ export default function ClientDetail() {
           <div style={styles.eyebrow}>{client?.client_code}</div>
           <h1 style={styles.heading}>{client?.name}</h1>
         </div>
-        <button style={styles.primaryButton} onClick={() => setShowForm(!showForm)}>
-          {showForm ? t("cancel_button") : t("new_project_button")}
-        </button>
       </header>
 
-      {showForm && (
+      {/* ===== Projects section ===== */}
+      <div style={styles.sectionHeader}>
+        <h2 style={styles.sectionTitle}>{t("new_project_button").replace("+ ", "")}</h2>
+        <button style={styles.primaryButton} onClick={() => setShowProjectForm(!showProjectForm)}>
+          {showProjectForm ? t("cancel_button") : t("new_project_button")}
+        </button>
+      </div>
+
+      {showProjectForm && (
         <form style={styles.card} onSubmit={handleCreateProject}>
           <div style={styles.formGrid}>
             <div>
               <label style={styles.label}>{t("project_name_label")}</label>
               <input
                 style={styles.input}
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                value={projectForm.name}
+                onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
                 required
               />
             </div>
@@ -107,14 +152,14 @@ export default function ClientDetail() {
                 type="number"
                 min="0"
                 max="100"
-                value={form.progress}
-                onChange={(e) => setForm({ ...form, progress: e.target.value })}
+                value={projectForm.progress}
+                onChange={(e) => setProjectForm({ ...projectForm, progress: e.target.value })}
               />
             </div>
           </div>
-          {error && <div style={styles.errorBox}>{error}</div>}
-          <button style={styles.primaryButton} type="submit" disabled={saving}>
-            {saving ? t("saving") : t("save_project_button")}
+          {projectError && <div style={styles.errorBox}>{projectError}</div>}
+          <button style={styles.primaryButton} type="submit" disabled={savingProject}>
+            {savingProject ? t("saving") : t("save_project_button")}
           </button>
         </form>
       )}
@@ -144,6 +189,79 @@ export default function ClientDetail() {
           ))
         )}
       </div>
+
+      {/* ===== Users section ===== */}
+      <div style={styles.sectionHeader}>
+        <h2 style={styles.sectionTitle}>{t("users_heading")}</h2>
+        <button style={styles.primaryButton} onClick={() => setShowUserForm(!showUserForm)}>
+          {showUserForm ? t("cancel_button") : t("new_user_button")}
+        </button>
+      </div>
+
+      {showUserForm && (
+        <form style={styles.card} onSubmit={handleCreateUser}>
+          <div style={styles.formGrid}>
+            <div>
+              <label style={styles.label}>{t("user_email_label")}</label>
+              <input
+                style={styles.input}
+                type="email"
+                value={userForm.email}
+                onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label style={styles.label}>{t("user_password_label")}</label>
+              <input
+                style={styles.input}
+                type="password"
+                value={userForm.password}
+                onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                required
+                minLength={6}
+              />
+            </div>
+            <div>
+              <label style={styles.label}>{t("user_fullname_label")}</label>
+              <input
+                style={styles.input}
+                value={userForm.full_name}
+                onChange={(e) => setUserForm({ ...userForm, full_name: e.target.value })}
+              />
+            </div>
+          </div>
+          {userError && <div style={styles.errorBox}>{userError}</div>}
+          <button style={styles.primaryButton} type="submit" disabled={savingUser}>
+            {savingUser ? t("saving") : t("save_user_button")}
+          </button>
+        </form>
+      )}
+
+      {userSuccess && <div style={styles.successBox}>{userSuccess}</div>}
+
+      <div style={styles.card}>
+        {users.length === 0 ? (
+          <p style={styles.muted}>{t("no_users_yet")}</p>
+        ) : (
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>{t("user_fullname_label")}</th>
+                <th style={styles.th}>{t("user_email_label")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id}>
+                  <td style={styles.td}>{u.full_name || "—"}</td>
+                  <td style={styles.tdCode}>{u.id}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
@@ -166,7 +284,19 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    margin: "20px 0 28px",
+    margin: "20px 0 20px",
+  },
+  sectionHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    margin: "28px 0 12px",
+  },
+  sectionTitle: {
+    fontSize: "16px",
+    fontWeight: 700,
+    color: "#1F2937",
+    margin: 0,
   },
   eyebrow: {
     fontSize: "13px",
@@ -196,7 +326,7 @@ const styles = {
     background: "#FFFFFF",
     borderRadius: "12px",
     padding: "24px",
-    marginBottom: "20px",
+    marginBottom: "12px",
     border: "1px solid #E5E0D5",
   },
   formGrid: {
@@ -224,6 +354,14 @@ const styles = {
   errorBox: {
     background: "#FDECEA",
     color: "#B3261E",
+    padding: "10px 14px",
+    borderRadius: "8px",
+    fontSize: "14px",
+    marginBottom: "16px",
+  },
+  successBox: {
+    background: "#E7F5EC",
+    color: "#1E7A46",
     padding: "10px 14px",
     borderRadius: "8px",
     fontSize: "14px",
@@ -268,5 +406,30 @@ const styles = {
   },
   slider: {
     width: "100%",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  th: {
+    textAlign: "start",
+    fontSize: "13px",
+    color: "#6B7280",
+    fontWeight: 600,
+    padding: "10px 8px",
+    borderBottom: "1px solid #E5E0D5",
+  },
+  td: {
+    padding: "12px 8px",
+    fontSize: "14px",
+    color: "#1F2937",
+    borderBottom: "1px solid #F0EDE4",
+  },
+  tdCode: {
+    padding: "12px 8px",
+    fontSize: "12px",
+    color: "#9CA3AF",
+    borderBottom: "1px solid #F0EDE4",
+    fontFamily: "monospace",
   },
 };
