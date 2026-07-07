@@ -10,7 +10,6 @@ const translations = {
     login_button: "دخول",
     login_error: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
     login_tagline: "ترصد كل خسارة. تكشف كل نمط. تتحكم في كل قرار.",
-
     owner_eyebrow: "لوحة تحكم الـ Owner",
     clients_heading: "الأطراف",
     new_client_button: "+ طرف جديد",
