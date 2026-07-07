@@ -424,7 +424,8 @@ const css = `
     position: relative;
     min-height: 100vh;
     background: #0B0D12;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     font-family: 'Inter', 'Segoe UI', sans-serif;
   }
   .lr-particles {
@@ -534,7 +535,8 @@ const css = `
   .lr-form-wrap { display: flex; justify-content: center; align-items: center; }
   .lr-card {
     width: 100%;
-    max-width: 380px;
+    max-width: 420px;
+    min-height: 660px;
     border-radius: 24px;
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(20,22,28,0.65);
@@ -544,14 +546,17 @@ const css = `
   .lr-card-content {
     position: relative;
     z-index: 2;
-    padding: 40px 32px;
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   .lr-card-brand { text-align: center; margin-bottom: 28px; }
   .lr-welcome { text-align: center; font-size: 24px; font-weight: 800; color: #F4F1EA; margin: 0 0 8px; }
   .lr-welcome-sub { text-align: center; font-size: 13px; color: #9CA3AF; margin-bottom: 30px; }
 
-  .lr-form { display: flex; flex-direction: column; }
+  .lr-form { display: flex; flex-direction: column; flex: 1; }
   .lr-label { font-size: 12px; color: #9CA3AF; margin-bottom: 7px; font-weight: 600; }
   .lr-input-wrap { position: relative; margin-bottom: 20px; }
   .lr-input-icon {
@@ -601,9 +606,16 @@ const css = `
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 10px 25px rgba(245,100,42,0.3);
+    margin-top: auto;
   }
   .lr-arrow { transition: transform 0.2s ease; }
   .lr-submit:hover .lr-arrow { transform: translateX(3px); }
+
+  /* Touch devices register :hover on tap, which would leave the glow stuck on.
+     Disable the hover-glow effect entirely on touch-only devices. */
+  @media (hover: none) {
+    .lr-glow-overlay { display: none; }
+  }
 
   /* ===== Responsive ===== */
   @media (max-width: 1024px) {
@@ -611,12 +623,13 @@ const css = `
     .lr-hero { font-size: 32px; }
   }
   @media (max-width: 900px) {
-    .lr-layout { grid-template-columns: 1fr; padding: 24px; }
+    .lr-layout { grid-template-columns: 1fr; padding: 24px; min-height: auto; }
     .lr-showcase { display: none; }
-    .lr-form-wrap { padding: 40px 0; }
+    .lr-form-wrap { padding: 40px 0; min-height: 100vh; }
   }
   @media (max-width: 480px) {
-    .lr-card-content { padding: 28px 20px; }
+    .lr-card { min-height: auto; max-width: 100%; }
+    .lr-card-content { padding: 32px 22px; }
     .lr-welcome { font-size: 20px; }
   }
 `;
