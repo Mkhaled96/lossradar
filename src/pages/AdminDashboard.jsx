@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { useLanguage } from "../lib/i18n.jsx";
-import LanguageToggle from "../components/LanguageToggle.jsx";
+import AdminLayout from "../components/AdminLayout.jsx";
 
 export default function AdminDashboard() {
   const { t } = useLanguage();
@@ -58,8 +58,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div style={styles.page}>
-      <LanguageToggle />
+    <AdminLayout>
       <header style={styles.header}>
         <div>
           <div style={styles.eyebrow}>{t("owner_eyebrow")}</div>
@@ -157,7 +156,7 @@ export default function AdminDashboard() {
           </table>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 }
 
@@ -282,5 +281,30 @@ const styles = {
     color: "#1F2937",
     textDecoration: "none",
     fontWeight: 600,
+  },
+  logoutButton: {
+    position: "absolute",
+    top: "20px",
+    insetInlineStart: "40px",
+    padding: "6px 14px",
+    borderRadius: "999px",
+    border: "1px solid #D8D3C7",
+    background: "transparent",
+    color: "#6B7280",
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  dashboardLink: {
+    padding: "11px 20px",
+    borderRadius: "8px",
+    border: "1px solid #D8D3C7",
+    background: "#FFFFFF",
+    color: "#1F2937",
+    fontSize: "15px",
+    fontWeight: 600,
+    textDecoration: "none",
+    display: "flex",
+    alignItems: "center",
   },
 };
