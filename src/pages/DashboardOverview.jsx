@@ -24,37 +24,38 @@ export default function DashboardOverview() {
 
   return (
     <AdminLayout>
-      <div className="do-wrap">
-        <style>{css}</style>
-        <h1 className="do-title">Dashboard</h1>
+      <style>{css}</style>
+      <h1 className="do-title">Dashboard</h1>
 
-        <div className="do-kpi-grid">
-          <KpiCard label="عدد العملاء (Parties)" value={clients.length} />
-          <KpiCard label="عدد التنبيهات" value={0} note="لسه مش متوصلة" />
-          <KpiCard label="عدد الطلبات" value={0} note="لسه مش متوصلة" />
-        </div>
+      <div className="do-kpi-grid">
+        <KpiCard icon="👥" label="عدد العملاء (Parties)" value={clients.length} />
+        <KpiCard icon="🔔" label="عدد التنبيهات" value={0} note="لسه مش متوصلة" />
+        <KpiCard icon="📥" label="عدد الطلبات" value={0} note="لسه مش متوصلة" />
+      </div>
 
-        <div className="do-card">
-          <div className="do-card-title">نمو عدد العملاء شهر عن شهر</div>
-          {loading ? (
-            <p className="do-muted">جارٍ التحميل...</p>
-          ) : monthly.length === 0 ? (
-            <p className="do-muted">لسه مفيش بيانات كفاية نرسم بيها الرسم البياني.</p>
-          ) : (
-            <LineChart data={monthly} />
-          )}
-        </div>
+      <div className="do-card">
+        <div className="do-card-title">نمو عدد العملاء شهر عن شهر</div>
+        {loading ? (
+          <p className="do-muted">جارٍ التحميل...</p>
+        ) : monthly.length === 0 ? (
+          <p className="do-muted">لسه مفيش بيانات كفاية نرسم بيها الرسم البياني.</p>
+        ) : (
+          <LineChart data={monthly} />
+        )}
       </div>
     </AdminLayout>
   );
 }
 
-function KpiCard({ label, value, note }) {
+function KpiCard({ icon, label, value, note }) {
   return (
     <div className="do-card do-kpi">
-      <div className="do-kpi-label">{label}</div>
-      <div className="do-kpi-value">{value}</div>
-      {note && <div className="do-kpi-note">{note}</div>}
+      <div className="do-kpi-icon">{icon}</div>
+      <div>
+        <div className="do-kpi-value">{value}</div>
+        <div className="do-kpi-label">{label}</div>
+        {note && <div className="do-kpi-note">{note}</div>}
+      </div>
     </div>
   );
 }
@@ -90,14 +91,14 @@ function LineChart({ data }) {
 
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="do-linechart" preserveAspectRatio="none">
-      <polyline points={points} fill="none" stroke="#D9762E" strokeWidth="2.5" />
+      <polyline points={points} fill="none" stroke="var(--accent)" strokeWidth="2.5" />
       {data.map((d, i) => {
         const x = data.length > 1 ? i * stepX : w / 2;
         const y = h - (d.total / max) * (h - 20) - 10;
         return (
           <g key={d.month}>
-            <circle cx={x} cy={y} r="3.5" fill="#D9762E" />
-            <text x={x} y={h - 2} fontSize="9" fill="#9CA3AF" textAnchor="middle">
+            <circle cx={x} cy={y} r="3.5" fill="var(--accent)" />
+            <text x={x} y={h - 2} fontSize="9" fill="var(--text-muted)" textAnchor="middle">
               {d.month.slice(5)}
             </text>
           </g>
@@ -108,19 +109,24 @@ function LineChart({ data }) {
 }
 
 const css = `
-  .do-title { font-size: 24px; font-weight: 700; color: #1F2937; margin: 0 0 20px; }
-  .do-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+  .do-title { font-size: 26px; font-weight: 800; color: var(--text-primary); margin: 0 0 20px; }
+  .do-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
   .do-card {
-    background: #FFFFFF;
-    border: 1px solid #E5E0D5;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: 14px;
     padding: 20px;
   }
-  .do-kpi-label { font-size: 12px; color: #6B7280; margin-bottom: 8px; }
-  .do-kpi-value { font-size: 28px; font-weight: 800; color: #1F2937; }
-  .do-kpi-note { font-size: 11px; color: #B45309; margin-top: 6px; }
-  .do-card-title { font-size: 14px; font-weight: 700; color: #1F2937; margin-bottom: 16px; }
-  .do-muted { color: #9CA3AF; font-size: 13px; }
+  .do-kpi { display: flex; align-items: center; gap: 14px; }
+  .do-kpi-icon {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--accent-soft);
+    display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+  }
+  .do-kpi-label { font-size: 12px; color: var(--text-secondary); }
+  .do-kpi-value { font-size: 24px; font-weight: 800; color: var(--text-primary); }
+  .do-kpi-note { font-size: 11px; color: #B45309; margin-top: 2px; }
+  .do-card-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
+  .do-muted { color: var(--text-muted); font-size: 13px; }
   .do-linechart { width: 100%; height: 160px; }
 
   @media (max-width: 700px) {
