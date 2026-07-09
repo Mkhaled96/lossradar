@@ -40,6 +40,7 @@ export default function AdminLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const [openCrm, setOpenCrm] = useState(true);
   const [profile, setProfile] = useState(null);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -131,18 +132,31 @@ export default function AdminLayout({ children }) {
           )}
         </nav>
 
-        <div className="al-profile">
-          <div className="al-avatar">{initials}</div>
-          {!collapsed && (
-            <div className="al-profile-info">
-              <div className="al-profile-name">{profile?.full_name || "Owner"}</div>
-              <div className="al-profile-role">{profile?.role || "administrator"}</div>
+        <div className="al-profile-wrap">
+          <button className="al-profile" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
+            <div className="al-avatar">{initials}</div>
+            {!collapsed && (
+              <div className="al-profile-info">
+                <div className="al-profile-name">{profile?.full_name || "Owner"}</div>
+              </div>
+            )}
+            {!collapsed && <span className="al-profile-caret">▾</span>}
+          </button>
+
+          {profileMenuOpen && (
+            <div className="al-profile-menu">
+              <button className="al-profile-menu-item">
+                <span className="al-menu-icon">👤</span> My Profile
+              </button>
+              <button className="al-profile-menu-item">
+                <span className="al-menu-icon">⚙️</span> Settings
+              </button>
+              <button className="al-profile-menu-item al-menu-logout" onClick={handleLogout}>
+                <span className="al-menu-icon">🚪</span> {t("logout_button")}
+              </button>
             </div>
           )}
         </div>
-        <button className="al-logout" onClick={handleLogout}>
-          🚪 {!collapsed && t("logout_button")}
-        </button>
       </aside>
 
       <main className="al-main">
@@ -173,6 +187,12 @@ export default function AdminLayout({ children }) {
 }
 
 const css = `
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: var(--bg);
+  }
   .al-shell {
     display: flex;
     min-height: 100vh;
@@ -234,13 +254,16 @@ const css = `
   .al-nav-child.active { color: var(--accent); font-weight: 600; }
   .al-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.6; }
 
+  .al-profile-wrap { position: relative; margin-top: 8px; width: 100%; }
   .al-profile {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 8px;
-    margin-top: 8px;
     border-top: 1px solid rgba(255,255,255,0.08);
     padding-top: 14px;
     width: 100%;
+    background: none;
+    border-left: none; border-right: none; border-bottom: none;
+    cursor: pointer;
   }
   .al-avatar {
     width: 32px; height: 32px; border-radius: 50%;
@@ -248,22 +271,37 @@ const css = `
     display: flex; align-items: center; justify-content: center;
     font-size: 12px; font-weight: 700; flex-shrink: 0;
   }
-  .al-profile-info { min-width: 0; }
+  .al-profile-info { min-width: 0; flex: 1; text-align: left; }
   .al-profile-name { font-size: 13px; font-weight: 600; color: #F4F1EA; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .al-profile-role { font-size: 11px; color: #9CA3AF; text-transform: capitalize; }
+  .al-profile-caret { font-size: 10px; color: #9CA3AF; }
 
-  .al-logout {
-    margin-top: 8px;
+  .al-profile-menu {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--sidebar-bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    z-index: 40;
+  }
+  .al-profile-menu-item {
+    display: flex; align-items: center; gap: 10px;
     width: 100%;
     padding: 9px 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: transparent;
-    color: #9CA3AF;
-    font-size: 12.5px;
+    border-radius: 7px;
+    background: none;
+    border: none;
+    color: #D1D5DB;
+    font-size: 13px;
     cursor: pointer;
     text-align: left;
   }
+  .al-profile-menu-item:hover { background: rgba(255,255,255,0.06); }
+  .al-menu-icon { font-size: 13px; width: 16px; text-align: center; }
+  .al-menu-logout { color: #F87171; }
 
   .al-main { flex: 1; padding: 24px 32px; min-width: 0; }
   .al-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -287,7 +325,7 @@ const css = `
     .al-sidebar { width: 100% !important; flex-direction: row; align-items: center; padding: 10px 14px; }
     .al-sidebar .al-nav { flex-direction: row; overflow-x: auto; }
     .al-nav-children { display: none !important; }
-    .al-profile, .al-logout { display: none; }
+    .al-profile-wrap { display: none; }
     .al-main { padding: 18px; }
   }
 `;
