@@ -108,46 +108,49 @@ export default function ClientDetail() {
   }
 
   if (loading) {
-    return <div style={styles.page}>{t("loading")}</div>;
+    return (
+      <AdminLayout>
+        <p className="cd-muted">{t("loading")}</p>
+      </AdminLayout>
+    );
   }
 
   return (
     <AdminLayout>
-      <Link to="/admin/parties" style={styles.backLink}>
+      <style>{css}</style>
+      <Link to="/admin/parties" className="cd-back">
         {t("back_to_clients")}
       </Link>
 
-      <header style={styles.header}>
-        <div>
-          <div style={styles.eyebrow}>{client?.client_code}</div>
-          <h1 style={styles.heading}>{client?.name}</h1>
-        </div>
+      <header className="cd-header">
+        <div className="cd-code">{client?.client_code}</div>
+        <h1 className="cd-title">{client?.name}</h1>
       </header>
 
-      {/* ===== Projects section ===== */}
-      <div style={styles.sectionHeader}>
-        <h2 style={styles.sectionTitle}>{t("new_project_button").replace("+ ", "")}</h2>
-        <button style={styles.primaryButton} onClick={() => setShowProjectForm(!showProjectForm)}>
+      {/* ===== Projects ===== */}
+      <div className="cd-section-header">
+        <h2 className="cd-section-title">{t("new_project_button").replace("+ ", "")}</h2>
+        <button className="cd-btn" onClick={() => setShowProjectForm(!showProjectForm)}>
           {showProjectForm ? t("cancel_button") : t("new_project_button")}
         </button>
       </div>
 
       {showProjectForm && (
-        <form style={styles.card} onSubmit={handleCreateProject}>
-          <div style={styles.formGrid}>
+        <form className="cd-card" onSubmit={handleCreateProject}>
+          <div className="cd-form-grid">
             <div>
-              <label style={styles.label}>{t("project_name_label")}</label>
+              <label className="cd-label">{t("project_name_label")}</label>
               <input
-                style={styles.input}
+                className="cd-input"
                 value={projectForm.name}
                 onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
                 required
               />
             </div>
             <div>
-              <label style={styles.label}>{t("project_progress_label")}</label>
+              <label className="cd-label">{t("project_progress_label")}</label>
               <input
-                style={styles.input}
+                className="cd-input"
                 type="number"
                 min="0"
                 max="100"
@@ -156,25 +159,25 @@ export default function ClientDetail() {
               />
             </div>
           </div>
-          {projectError && <div style={styles.errorBox}>{projectError}</div>}
-          <button style={styles.primaryButton} type="submit" disabled={savingProject}>
+          {projectError && <div className="cd-error">{projectError}</div>}
+          <button className="cd-btn" type="submit" disabled={savingProject}>
             {savingProject ? t("saving") : t("save_project_button")}
           </button>
         </form>
       )}
 
-      <div style={styles.card}>
+      <div className="cd-card">
         {projects.length === 0 ? (
-          <p style={styles.muted}>{t("no_projects_yet")}</p>
+          <p className="cd-muted">{t("no_projects_yet")}</p>
         ) : (
           projects.map((p) => (
-            <div key={p.id} style={styles.projectRow}>
-              <div style={styles.projectHeader}>
-                <span style={styles.projectName}>{p.name}</span>
-                <span style={styles.projectPercent}>{p.progress}%</span>
+            <div key={p.id} className="cd-project-row">
+              <div className="cd-project-head">
+                <span className="cd-project-name">{p.name}</span>
+                <span className="cd-project-pct">{p.progress}%</span>
               </div>
-              <div style={styles.progressTrack}>
-                <div style={{ ...styles.progressFill, width: `${p.progress}%` }} />
+              <div className="cd-track">
+                <div className="cd-fill" style={{ width: `${p.progress}%` }} />
               </div>
               <input
                 type="range"
@@ -182,28 +185,28 @@ export default function ClientDetail() {
                 max="100"
                 value={p.progress}
                 onChange={(e) => updateProgress(p.id, Number(e.target.value))}
-                style={styles.slider}
+                className="cd-slider"
               />
             </div>
           ))
         )}
       </div>
 
-      {/* ===== Users section ===== */}
-      <div style={styles.sectionHeader}>
-        <h2 style={styles.sectionTitle}>{t("users_heading")}</h2>
-        <button style={styles.primaryButton} onClick={() => setShowUserForm(!showUserForm)}>
+      {/* ===== Users ===== */}
+      <div className="cd-section-header">
+        <h2 className="cd-section-title">{t("users_heading")}</h2>
+        <button className="cd-btn" onClick={() => setShowUserForm(!showUserForm)}>
           {showUserForm ? t("cancel_button") : t("new_user_button")}
         </button>
       </div>
 
       {showUserForm && (
-        <form style={styles.card} onSubmit={handleCreateUser}>
-          <div style={styles.formGrid}>
+        <form className="cd-card" onSubmit={handleCreateUser}>
+          <div className="cd-form-grid">
             <div>
-              <label style={styles.label}>{t("user_email_label")}</label>
+              <label className="cd-label">{t("user_email_label")}</label>
               <input
-                style={styles.input}
+                className="cd-input"
                 type="email"
                 value={userForm.email}
                 onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
@@ -211,9 +214,9 @@ export default function ClientDetail() {
               />
             </div>
             <div>
-              <label style={styles.label}>{t("user_password_label")}</label>
+              <label className="cd-label">{t("user_password_label")}</label>
               <input
-                style={styles.input}
+                className="cd-input"
                 type="password"
                 value={userForm.password}
                 onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
@@ -222,39 +225,39 @@ export default function ClientDetail() {
               />
             </div>
             <div>
-              <label style={styles.label}>{t("user_fullname_label")}</label>
+              <label className="cd-label">{t("user_fullname_label")}</label>
               <input
-                style={styles.input}
+                className="cd-input"
                 value={userForm.full_name}
                 onChange={(e) => setUserForm({ ...userForm, full_name: e.target.value })}
               />
             </div>
           </div>
-          {userError && <div style={styles.errorBox}>{userError}</div>}
-          <button style={styles.primaryButton} type="submit" disabled={savingUser}>
+          {userError && <div className="cd-error">{userError}</div>}
+          <button className="cd-btn" type="submit" disabled={savingUser}>
             {savingUser ? t("saving") : t("save_user_button")}
           </button>
         </form>
       )}
 
-      {userSuccess && <div style={styles.successBox}>{userSuccess}</div>}
+      {userSuccess && <div className="cd-success">{userSuccess}</div>}
 
-      <div style={styles.card}>
+      <div className="cd-card">
         {users.length === 0 ? (
-          <p style={styles.muted}>{t("no_users_yet")}</p>
+          <p className="cd-muted">{t("no_users_yet")}</p>
         ) : (
-          <table style={styles.table}>
+          <table className="cd-table">
             <thead>
               <tr>
-                <th style={styles.th}>{t("user_fullname_label")}</th>
-                <th style={styles.th}>{t("user_email_label")}</th>
+                <th>{t("user_fullname_label")}</th>
+                <th>{t("user_email_label")}</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
-                  <td style={styles.td}>{u.full_name || "—"}</td>
-                  <td style={styles.tdCode}>{u.id}</td>
+                  <td>{u.full_name || "—"}</td>
+                  <td className="cd-code-cell">{u.id}</td>
                 </tr>
               ))}
             </tbody>
@@ -265,170 +268,43 @@ export default function ClientDetail() {
   );
 }
 
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#F4F1EA",
-    padding: "40px",
-    fontFamily: "'Inter', 'Segoe UI', sans-serif",
-    position: "relative",
-  },
-  backLink: {
-    color: "#D9762E",
-    fontSize: "14px",
-    textDecoration: "none",
-    fontWeight: 600,
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    margin: "20px 0 20px",
-  },
-  sectionHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    margin: "28px 0 12px",
-  },
-  sectionTitle: {
-    fontSize: "16px",
-    fontWeight: 700,
-    color: "#1F2937",
-    margin: 0,
-  },
-  eyebrow: {
-    fontSize: "13px",
-    letterSpacing: "2px",
-    color: "#D9762E",
-    fontWeight: 600,
-    marginBottom: "4px",
-    fontFamily: "monospace",
-  },
-  heading: {
-    fontSize: "26px",
-    fontWeight: 700,
-    color: "#1F2937",
-    margin: 0,
-  },
-  primaryButton: {
-    padding: "11px 20px",
-    borderRadius: "8px",
-    border: "none",
-    background: "#D9762E",
-    color: "#fff",
-    fontSize: "15px",
-    fontWeight: 600,
-    cursor: "pointer",
-  },
-  card: {
-    background: "#FFFFFF",
-    borderRadius: "12px",
-    padding: "24px",
-    marginBottom: "12px",
-    border: "1px solid #E5E0D5",
-  },
-  formGrid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "16px",
-    marginBottom: "16px",
-  },
-  label: {
-    fontSize: "13px",
-    color: "#4B5563",
-    marginBottom: "6px",
-    fontWeight: 500,
-    display: "block",
-  },
-  input: {
-    width: "100%",
-    padding: "10px 12px",
-    borderRadius: "8px",
-    border: "1px solid #D8D3C7",
-    fontSize: "14px",
-    outline: "none",
-    boxSizing: "border-box",
-  },
-  errorBox: {
-    background: "#FDECEA",
-    color: "#B3261E",
-    padding: "10px 14px",
-    borderRadius: "8px",
-    fontSize: "14px",
-    marginBottom: "16px",
-  },
-  successBox: {
-    background: "#E7F5EC",
-    color: "#1E7A46",
-    padding: "10px 14px",
-    borderRadius: "8px",
-    fontSize: "14px",
-    marginBottom: "16px",
-  },
-  muted: {
-    color: "#9CA3AF",
-    fontSize: "14px",
-  },
-  projectRow: {
-    padding: "16px 0",
-    borderBottom: "1px solid #F0EDE4",
-  },
-  projectHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "8px",
-  },
-  projectName: {
-    fontSize: "15px",
-    fontWeight: 600,
-    color: "#1F2937",
-  },
-  projectPercent: {
-    fontSize: "14px",
-    fontWeight: 700,
-    color: "#D9762E",
-  },
-  progressTrack: {
-    width: "100%",
-    height: "8px",
-    background: "#F0EDE4",
-    borderRadius: "999px",
-    overflow: "hidden",
-    marginBottom: "8px",
-  },
-  progressFill: {
-    height: "100%",
-    background: "#D9762E",
-    borderRadius: "999px",
-    transition: "width 0.3s ease",
-  },
-  slider: {
-    width: "100%",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-  th: {
-    textAlign: "start",
-    fontSize: "13px",
-    color: "#6B7280",
-    fontWeight: 600,
-    padding: "10px 8px",
-    borderBottom: "1px solid #E5E0D5",
-  },
-  td: {
-    padding: "12px 8px",
-    fontSize: "14px",
-    color: "#1F2937",
-    borderBottom: "1px solid #F0EDE4",
-  },
-  tdCode: {
-    padding: "12px 8px",
-    fontSize: "12px",
-    color: "#9CA3AF",
-    borderBottom: "1px solid #F0EDE4",
-    fontFamily: "monospace",
-  },
-};
+const css = `
+  .cd-back { color: var(--accent); font-size: 13px; text-decoration: none; font-weight: 600; }
+  .cd-header { margin: 16px 0 24px; }
+  .cd-code { font-size: 12px; letter-spacing: 2px; color: var(--accent); font-weight: 600; font-family: monospace; margin-bottom: 4px; }
+  .cd-title { font-size: 24px; font-weight: 800; color: var(--text-primary); margin: 0; }
+
+  .cd-section-header { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 12px; }
+  .cd-section-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin: 0; }
+  .cd-btn {
+    padding: 10px 18px; border-radius: 8px; border: none;
+    background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+
+  .cd-card {
+    background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 20px; margin-bottom: 12px;
+  }
+  .cd-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .cd-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; display: block; }
+  .cd-input {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--input-border);
+    background: var(--input-bg); color: var(--text-primary); font-size: 14px; outline: none; box-sizing: border-box;
+  }
+  .cd-error { background: #FDECEA; color: #B3261E; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
+  .cd-success { background: rgba(34,197,94,0.12); color: #16A34A; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
+  .cd-muted { color: var(--text-muted); font-size: 14px; }
+
+  .cd-project-row { padding: 14px 0; border-bottom: 1px solid var(--row-border); }
+  .cd-project-head { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .cd-project-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .cd-project-pct { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .cd-track { width: 100%; height: 8px; background: var(--row-border); border-radius: 999px; overflow: hidden; margin-bottom: 8px; }
+  .cd-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+  .cd-slider { width: 100%; }
+
+  .cd-table { width: 100%; border-collapse: collapse; }
+  .cd-table th { text-align: start; font-size: 12px; color: var(--text-secondary); padding: 8px; border-bottom: 1px solid var(--card-border); }
+  .cd-table td { padding: 10px 8px; font-size: 14px; color: var(--text-primary); border-bottom: 1px solid var(--row-border); }
+  .cd-code-cell { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+`;
