@@ -57,14 +57,14 @@ export default function UsersPage() {
 }
 
 const css = `
-  .up-title { font-size: 24px; font-weight: 700; color: #1F2937; margin: 0 0 20px; }
-  .up-card { background: #fff; border: 1px solid #E5E0D5; border-radius: 14px; padding: 20px; }
-  .up-muted { color: #9CA3AF; font-size: 14px; }
+  .up-title { font-size: 26px; font-weight: 800; color: var(--text-primary); margin: 0 0 20px; }
+  .up-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px; }
+  .up-muted { color: var(--text-muted); font-size: 14px; }
   .up-table { width: 100%; border-collapse: collapse; }
-  .up-table th { text-align: start; font-size: 12px; color: #6B7280; padding: 8px; border-bottom: 1px solid #E5E0D5; }
-  .up-table td { padding: 10px 8px; font-size: 14px; color: #1F2937; border-bottom: 1px solid #F0EDE4; }
+  .up-table th { text-align: start; font-size: 12px; color: var(--text-secondary); padding: 8px; border-bottom: 1px solid var(--card-border); }
+  .up-table td { padding: 10px 8px; font-size: 14px; color: var(--text-primary); border-bottom: 1px solid var(--row-border); }
   .up-badge { font-size: 11px; padding: 3px 10px; border-radius: 999px; text-transform: capitalize; }
-  .up-badge-owner { background: #FDE7DC; color: #B45309; }
-  .up-badge-admin { background: #DBEAFE; color: #1D4ED8; }
-  .up-badge-client { background: #E7F5EC; color: #1E7A46; }
+  .up-badge-owner { background: rgba(180,83,9,0.15); color: #B45309; }
+  .up-badge-admin { background: rgba(29,78,216,0.15); color: #3B82F6; }
+  .up-badge-client { background: rgba(34,197,94,0.15); color: #16A34A; }
 `;
